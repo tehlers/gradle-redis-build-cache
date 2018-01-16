@@ -1,0 +1,18 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'net.idlestate:gradle-redis-build-cache:1.0.0'
+    }
+}
+
+apply plugin: net.idlestate.gradle.caching.RedisBuildCachePlugin
+
+buildCache {
+    local {
+        enabled = false
+    }
+}

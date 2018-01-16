@@ -1,0 +1,77 @@
+plugins {
+    id 'com.github.hierynomus.license' version '0.14.0'
+    id 'com.jfrog.bintray' version '1.7.3'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+group = 'net.idlestate'
+version = '1.0.0'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'redis.clients:jedis:2.9.0'
+}
+
+gradlePlugin {
+    plugins {
+        redisBuildCache {
+            id = 'net.idlestate.gradle.caching.redis-build-cache'
+            implementationClass = 'net.idlestate.gradle.caching.RedisBuildCachePlugin'
+        }
+    }
+}
+
+task sourceJar( type: Jar ) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        gradlePlugin( MavenPublication ) {
+            artifactId archivesBaseName
+            from components.java
+
+            artifact sourceJar {
+                classifier 'sources'
+            }
+
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = Closure.DELEGATE_FIRST
+                    description 'A Gradle plugin that uses Redis as a build cache'
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    // Define in ~/.gradle/gradle.properties or as project property on startup
+    user = bintray_user
+    key = bintray_api_key
+
+    publications = [ 'gradlePlugin' ]
+
+    pkg {
+        repo = 'maven'
+        name = archivesBaseName
+        licenses = [ 'Apache-2.0' ]
+        vcsUrl = 'https://github.com/tehlers/gradle-redis-build-cache.git'
+        version {
+            name = project.version
+            desc = 'A Gradle plugin that uses Redis as a build cache'
+            released = new Date()
+        }
+    }
+}

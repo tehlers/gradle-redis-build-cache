@@ -1,0 +1,23 @@
+apply plugin: 'base'
+
+@CacheableTask
+class BuildCacheExample extends DefaultTask {
+    @InputDirectory
+    File input
+
+    @OutputDirectory
+    File output
+
+    @TaskAction
+    doSomething() {
+        project.copy {
+            from input
+            into output
+        }
+    }
+}
+
+task( 'buildCacheExample', type: BuildCacheExample ) {
+    input = file( 'src/main/resources' )
+    output = file( 'build/buildCacheExample' )
+}

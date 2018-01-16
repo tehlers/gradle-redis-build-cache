@@ -1,0 +1,30 @@
+initscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'net.idlestate:gradle-redis-build-cache:1.0.0'
+    }
+}
+
+import net.idlestate.gradle.caching.RedisBuildCache
+import net.idlestate.gradle.caching.RedisBuildCacheServiceFactory
+
+gradle.settingsEvaluated { settings ->
+    settings.buildCache {
+        local {
+            enabled = false
+        }
+
+        registerBuildCacheService( RedisBuildCache.class, RedisBuildCacheServiceFactory.class )
+
+        remote( RedisBuildCache.class ) {
+            host = '127.0.0.1'
+            port = 6379
+            enabled = true
+            push = true
+        }
+    }
+}
