@@ -26,6 +26,7 @@ public class RedisBuildCache extends AbstractBuildCache {
 
     private String _host = System.getProperty( "net.idlestate.gradle.caching.redis.host", "localhost" );
     private int _port = getDefaultPort();
+    private String _password = System.getProperty( "net.idlestate.gradle.caching.redis.password", null );
 
     private int _timeToLive = getDefaultTimeToLive();
 
@@ -69,6 +70,18 @@ public class RedisBuildCache extends AbstractBuildCache {
 
     public void setPort( final int port ) {
         _port = port;
+    }
+
+
+    /**
+     * @return Redis password - default: no password.
+     */
+    public String getPassword() {
+        return _password;
+    }
+
+    public void setPassword( final String password ) {
+        _password = password;
     }
 
     /**

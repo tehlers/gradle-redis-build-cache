@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.0.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.1.0'
     }
 }
 

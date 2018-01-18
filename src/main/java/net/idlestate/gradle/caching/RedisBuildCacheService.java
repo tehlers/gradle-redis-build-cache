@@ -30,6 +30,7 @@ import org.gradle.caching.BuildCacheService;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 
 /**
  * BuildCacheService that stores the build artifacts in Redis.
@@ -41,8 +42,8 @@ public class RedisBuildCacheService implements BuildCacheService {
     private final JedisPool _jedisPool;
     private final int _timeToLive;
 
-    public RedisBuildCacheService( final String host, final int port, final int timeToLive ) {
-        _jedisPool = new JedisPool( new JedisPoolConfig(), host, port );
+    public RedisBuildCacheService( final String host, final int port, final String password, final int timeToLive ) {
+        _jedisPool = new JedisPool( new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password );
         _timeToLive = timeToLive * 60;
     }
 
@@ -98,13 +99,13 @@ public class RedisBuildCacheService implements BuildCacheService {
             jedis = _jedisPool.getResource();
             return jedisOperation.apply( jedis );
         } catch ( final Throwable e ) {
-            throw new BuildCacheException( "Failed to communicate with Redis", e );
+            throw new BuildCacheException( "Failed to communicate with Redis.", e );
         } finally {
             if ( jedis != null ) {
                 try {
                     jedis.close();
                 } catch ( final Throwable e ) {
-                    throw new BuildCacheException( "Unable to close connection", e );
+                    throw new BuildCacheException( "Unable to close connection.", e );
                 }
             }
         }
