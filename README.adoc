@@ -38,8 +38,9 @@ There are multiple ways to use the Redis based build cache inside your projects.
 --------------------------------------------------------------------
 buildscript {
     repositories {
-        mavenLocal()
-        jcenter()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
     }
 
     dependencies {
@@ -63,7 +64,9 @@ buildCache {
 --------------------------------------------------------------------
 buildscript {
     repositories {
-        jcenter()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
     }
 
     dependencies {
@@ -98,8 +101,9 @@ buildCache {
 --------------------------------------------------------------------
 initscript {
     repositories {
-        mavenLocal()
-        jcenter()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
     }
 
     dependencies {
