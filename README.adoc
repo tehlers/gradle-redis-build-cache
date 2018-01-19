@@ -17,6 +17,10 @@ The build cache takes the following options:
 |net.idlestate.gradle.caching.redis.port
 |6379
 
+|password
+|net.idlestate.gradle.caching.redis.password
+|<no password>
+
 |timeToLive
 |net.idlestate.gradle.caching.redis.ttl
 |14400 (10 days in minutes)
@@ -39,11 +43,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.0.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.1.0'
     }
 }
 
-apply plugin: net.idlestate.gradle.caching.RedisBuildCachePlugin
+apply plugin: 'net.idlestate.gradle-redis-build-cache'
 
 buildCache {
     local {
@@ -63,7 +67,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.0.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.1.0'
     }
 }
 
@@ -99,7 +103,7 @@ initscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.0.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.1.0'
     }
 }
 

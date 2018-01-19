@@ -9,7 +9,7 @@ buildscript {
     }
 }
 
-apply plugin: net.idlestate.gradle.caching.RedisBuildCachePlugin
+apply plugin: 'net.idlestate.gradle-redis-build-cache'
 
 buildCache {
     local {
