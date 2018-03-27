@@ -18,6 +18,9 @@ package net.idlestate.gradle.caching;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.function.Function;
 
@@ -31,6 +34,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * BuildCacheService that stores the build artifacts in Redis.
@@ -39,30 +43,57 @@ import redis.clients.jedis.Protocol;
  */
 public class RedisBuildCacheService implements BuildCacheService {
 
+    private static final String MISSES = "misses";
+    private static final String HITS = "hits";
+    private static final String BEGIN = "begin";
+    private static final String SIZE = "size";
+    private static final String END = "end";
+    private static final String DURATION = "duration";
     private final JedisPool _jedisPool;
     private final int _timeToLive;
 
-    public RedisBuildCacheService( final String host, final int port, final String password, final int timeToLive ) {
+    RedisBuildCacheService( final String host, final int port, final String password, final int timeToLive ) {
         _jedisPool = new JedisPool( new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password );
         _timeToLive = timeToLive * 60;
     }
 
     @Override
     public boolean load( final BuildCacheKey key, final BuildCacheEntryReader reader ) throws BuildCacheException {
+        final String dailyStatisticKey = createDailyStatisticKey();
+        final String keyStatisticKey = createKeyStatisticKey( key );
+
         return withJedis( jedis -> {
             final String value = jedis.get( key.getHashCode() );
             if ( value != null ) {
                 try {
                     reader.readFrom( new ByteArrayInputStream( Base64.getDecoder().decode( value ) ) );
                     jedis.expire( key.getHashCode(), _timeToLive );
+
+                    jedis.hincrBy( dailyStatisticKey, HITS, 1 );
+                    jedis.hincrBy( dailyStatisticKey, "key_" + key.getHashCode() + "_"+ HITS, 1 );
+                    jedis.hincrBy( keyStatisticKey, HITS, 1 );
+
                     return Boolean.TRUE;
                 } catch ( final IOException e ) {
                     throw new BuildCacheException( "Unable to convert '" + value + "' to InputStream.", e );
                 }
             }
 
+            jedis.hincrBy( dailyStatisticKey, MISSES, 1 );
+            jedis.hincrBy( dailyStatisticKey, "key_" + key.getHashCode() + "_" + MISSES, 1 );
+            jedis.hincrBy( keyStatisticKey, MISSES, 1 );
+            jedis.hset( keyStatisticKey, BEGIN, Long.toString( Instant.now().toEpochMilli() ) );
+
             return Boolean.FALSE;
         } );
+    }
+
+    private static String createDailyStatisticKey() {
+        return "statistic_" + LocalDate.now().format( DateTimeFormatter.ISO_DATE );
+    }
+
+    private static String createKeyStatisticKey( final BuildCacheKey key ) {
+        return "key_statistic_" + key.getHashCode();
     }
 
     @Override
@@ -82,13 +113,31 @@ public class RedisBuildCacheService implements BuildCacheService {
         }
 
         withJedis( jedis -> {
-            jedis.setex( key.getHashCode(), _timeToLive, Base64.getEncoder().encodeToString( value.toByteArray() ) );
+            final String encodedValue = Base64.getEncoder().encodeToString( value.toByteArray() );
+            jedis.setex( key.getHashCode(), _timeToLive, encodedValue );
+
+            final String statisticKey = createKeyStatisticKey( key );
+            jedis.hset( statisticKey, SIZE, Integer.toString( encodedValue.length() ) );
+
+            final long end = Instant.now().toEpochMilli();
+            jedis.hset( statisticKey, END, Long.toString( end ) );
+
+            final String beginString = jedis.hget( statisticKey, BEGIN );
+            if ( beginString != null ) {
+                try {
+                    final long begin = Long.parseLong( beginString );
+                    jedis.hset( statisticKey, DURATION, Long.toString( end - begin ) );
+                } catch ( final NumberFormatException e ) {
+                    // ignored
+                }
+            }
+
             return Boolean.TRUE;
         } );
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws JedisException {
         _jedisPool.close();
     }
 

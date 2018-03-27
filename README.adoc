@@ -44,7 +44,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.1.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.2.0'
     }
 }
 
@@ -70,7 +70,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.1.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.2.0'
     }
 }
 
@@ -107,7 +107,7 @@ initscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.1.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.2.0'
     }
 }
 
@@ -135,6 +135,61 @@ gradle.settingsEvaluated { settings ->
 --------------------------------------------------------------------
 % ./gradlew --build-cache --init-script init-build-cache.gradle <task>
 --------------------------------------------------------------------
+
+## Statistic
+
+The plugin tracks some values to analyse the cache utilisation and adjust the
+cache and redis settings.
+
+[cols="1,1,2a"]
+|===
+|Purpose |Redis key format |Values
+
+|Daily usage
+|statistic_YYYY-MM-DD
+|
+[cols="1,1"]
+!===
+
+!hits
+!total hits on given date
+
+!misses
+!total misses on given date
+
+!key_KEY_hits
+!hits for KEY on given date
+
+!key_KEY_misses
+!misses for KEY on given date
+
+!===
+
+|Key specific usage
+|key_statistic_KEY
+|
+[cols="1,1"]
+!===
+
+!hits
+!total hits for KEY
+
+!misses
+!total misses for KEY
+
+!begin
+!timestamp of last cache miss
+
+!end
+!timestamp of last cache storage
+
+!duration
+!duration for calculation of cached value
+
+!size
+!size of cached value
+
+|===
 
 ## License
 
