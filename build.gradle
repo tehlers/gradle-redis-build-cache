@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.idlestate'
-version = '1.2.0'
+version = '1.2.1'
 
 repositories {
     jcenter()
@@ -33,7 +33,7 @@ pluginBundle {
         redisBuildCache {
             id = 'net.idlestate.gradle-redis-build-cache'
             displayName = 'Redis Build Cache'
-            description = 'A Gradle build cache implementation that uses Redis to store the build artifacts'
+            description = "A Gradle build cache implementation that uses Redis to store the build artifacts. Since this is a settings plugin the build script snippets below won't work. Please consult the documentation at Github."
             tags = ['build-cache', 'redis', 'cache']
         }
     }

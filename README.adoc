@@ -44,7 +44,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.2.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.2.1'
     }
 }
 
@@ -70,7 +70,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.2.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.2.1'
     }
 }
 
@@ -107,7 +107,7 @@ initscript {
     }
 
     dependencies {
-        classpath 'net.idlestate:gradle-redis-build-cache:1.2.0'
+        classpath 'net.idlestate:gradle-redis-build-cache:1.2.1'
     }
 }
 
