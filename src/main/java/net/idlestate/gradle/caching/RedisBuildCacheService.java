@@ -71,7 +71,10 @@ public class RedisBuildCacheService implements BuildCacheService {
 
                     jedis.hincrBy( dailyStatisticKey, HITS, 1 );
                     jedis.hincrBy( dailyStatisticKey, "key_" + key.getHashCode() + "_"+ HITS, 1 );
+                    jedis.expire(dailyStatisticKey, _timeToLive);
+
                     jedis.hincrBy( keyStatisticKey, HITS, 1 );
+                    jedis.expire(keyStatisticKey, _timeToLive);
 
                     return Boolean.TRUE;
                 } catch ( final IOException e ) {
@@ -81,8 +84,11 @@ public class RedisBuildCacheService implements BuildCacheService {
 
             jedis.hincrBy( dailyStatisticKey, MISSES, 1 );
             jedis.hincrBy( dailyStatisticKey, "key_" + key.getHashCode() + "_" + MISSES, 1 );
+            jedis.expire(dailyStatisticKey, _timeToLive);
+
             jedis.hincrBy( keyStatisticKey, MISSES, 1 );
             jedis.hset( keyStatisticKey, BEGIN, Long.toString( Instant.now().toEpochMilli() ) );
+            jedis.expire(keyStatisticKey, _timeToLive);
 
             return Boolean.FALSE;
         } );
@@ -131,6 +137,7 @@ public class RedisBuildCacheService implements BuildCacheService {
                     // ignored
                 }
             }
+            jedis.expire(statisticKey, _timeToLive);
 
             return Boolean.TRUE;
         } );
